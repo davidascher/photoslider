@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Animated GIF Generator</title>
+		<meta charset="utf-8">
+		<style>
+			body {
+				background-color: #ffffff;
+			}
+		</style>
+	</head>
+	<body>
+
+		<script type="text/javascript" src="tween.min.js"></script>
+		<script type="text/javascript" src="pixastic.core.js"></script>
+		<script type="text/javascript" src="actions/brightness.js"></script>
+		<script type="text/javascript" src="actions/lighten.js"></script>
+		<script src="RequestAnimationFrame.js"></script>
+		<script src="omggif.js"></script>
+		<img id="img" src="pizza.jpg" style="display:none;"></img>
+		<img id="target" style="display:none;"></img>
+		<div>
+			<span id="brightness"></span> brightness and <span id="contrast"></span> contrast;
+		</div>
+		<button onclick="doit()">do it</button>
+		<script>
+		try {
+			img = document.getElementById('img');
+			target = document.getElementById('target');
+			target.src = img.src;
+			b = 10;
+			c = .1;
+
+			var target;
+			var tween, tweenBack;
+
+			var position, end;
+
+			function init() {
+				position = {brightness: 0, contrast: -1};
+				end = {brightness: 0, contrast: .03};
+				var tweenBack = new TWEEN.Tween(position)
+					.to({brightness: 0, contrast: .9}, 1000)
+					.easing(TWEEN.Easing.Cubic.InOut)
+					.onUpdate(update);
+
+				var tweenNormal = new TWEEN.Tween(position)
+					.to({brightness: 0, contrast: 0}, 500)
+					.easing(TWEEN.Easing.Cubic.InOut)
+					.onUpdate(update);
+
+				tweenBack.chain(tweenNormal);
+
+				var tweenBright = new TWEEN.Tween(position)
+					.to({brightness: 40, contrast: .2}, 200)
+					.easing(TWEEN.Easing.Cubic.In)
+					.onUpdate(update);
+
+				tweenBack.chain(tweenNormal);
+				tweenNormal.chain(tweenBright);
+				tweenBack.start();
+			}
+			function animate() {
+				requestAnimationFrame( animate );
+				TWEEN.update();		
+			}
+
+	        function update() {
+	        	var img = document.getElementById('img');
+	        	// var canvas = document.createElement("canvas");
+				if (img.parentNode && img.parentNode.replaceChild) {
+					target = document.getElementById('target');
+					newimg = target.cloneNode();
+					newimg.id = "img";
+					newimg.setAttribute('style', '');
+					img.parentNode.replaceChild(newimg, img);
+				}
+				Pixastic.process(
+					document.getElementById('img'),
+					"brightness", { "brightness" : position.brightness, contrast: position.contrast }
+	            )
+	            // document.getElementById('brightness').innerHTML = String(position.brightness);
+	            // document.getElementById('contrast').innerHTML = String(position.contrast);
+			}
+			function doit() {
+				init();
+				animate();
+			}
+		} catch (e) {
+			console.log(e);
+		}
+
+// 			function generateGIF() {
+
+// 				generating = true;
+
+// 				var current = 0;
+// 				var total = 100;
+
+// 				var canvas = document.createElement( 'canvas' );
+// 				canvas.width = renderer.domElement.width;
+// 				canvas.height = renderer.domElement.height;
+
+// 				var context = canvas.getContext( '2d' );
+
+// 				var buffer = new Uint8Array( canvas.width * canvas.height * total * 5 );
+// 				var gif = new GifWriter( buffer, canvas.width, canvas.height, { loop: 0 } );
+
+// 				var pixels = new Uint8Array( canvas.width * canvas.height );
+
+// 				var addFrame = function () {
+
+// 					render( current / total );
+
+// 					context.drawImage( renderer.domElement, 0, 0 );
+
+// 					var data = context.getImageData( 0, 0, canvas.width, canvas.height ).data;
+
+// 					var palette = [];
+
+// 					for ( var j = 0, k = 0, jl = data.length; j < jl; j += 4, k ++ ) {
+
+// 						var r = Math.floor( data[ j + 0 ] * 0.1 ) * 10;
+// 						var g = Math.floor( data[ j + 1 ] * 0.1 ) * 10;
+// 						var b = Math.floor( data[ j + 2 ] * 0.1 ) * 10;
+// 						var color = r << 16 | g << 8 | b << 0;
+
+// 						var index = palette.indexOf( color );
+
+// 						if ( index === -1 ) {
+
+// 							pixels[ k ] = palette.length;
+// 							palette.push( color );
+
+// 						} else {
+
+// 							pixels[ k ] = index;
+
+// 						}
+
+// 					}
+
+// 					// force palette to be power of 2
+
+// 					var powof2 = 1;
+// 					while ( powof2 < palette.length ) powof2 <<= 1;
+// 					palette.length = powof2;
+
+// 					gif.addFrame( 0, 0, canvas.width, canvas.height, pixels, { palette: new Uint32Array( palette ), delay: 5 } );
+
+// 					current ++;
+
+// 					if ( current < total ) {
+
+// 						setTimeout( addFrame, 0 );
+
+// 					} else {
+
+// 						setTimeout( finish, 0 );
+
+// 					}
+
+// 					progress.value = current / total;
+
+// 				}
+
+// 				var finish = function () {
+
+// 					// return buffer.slice( 0, gif.end() );
+
+// 					var string = '';
+
+// 					for ( var i = 0, l = gif.end(); i < l; i ++ ) {
+
+// 						string += String.fromCharCode( buffer[ i ] )
+
+// 					}
+
+// 					var image = document.createElement( 'img' );
+// 					image.src = 'data:image/gif;base64,' + btoa( string );
+// 					document.body.appendChild( image );
+
+// 					generating = false;
+// 					animate();
+
+// 				}
+
+// 				addFrame();
+
+// 			}
+
+		</script>
+	</body>
+</html>
+
